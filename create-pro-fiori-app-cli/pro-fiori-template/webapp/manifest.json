@@ -74,8 +74,9 @@
                 "settings": {
                     "bundleName": "<%= namespace %>.i18n.i18n"
                 }
-            },
+            }
             <% if (serviceType === 'ODataV2') { %>
+            ,
             "oDataV2Model": {
                 "dataSource": "v2Service",
                 "preload": true,
@@ -84,7 +85,7 @@
                     "useBatch": true,
                     "json": true
                 }
-            },
+            }
             <% } else if (serviceType === 'ODataV4') { %>
             "oDataV4Model": {
                 "dataSource": "v4Service",
@@ -94,11 +95,16 @@
                     "groupId": "$auto",
                     "synchronizationMode": "None"
                 }
-            },
+            }
             <% } %>
         },
         "resources": {
-            "css": []
+            "css": [
+                <% if (serviceType === 'Rest') { %>
+                { "uri": "css/style.css" },
+                <% } %>
+                { "uri": "css/boostrap.css" }
+            ]
         },
         "routing": {
             "config": {},

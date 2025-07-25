@@ -9,6 +9,7 @@ const execa = require("execa");
 const commandExists = require("command-exists");
 
 async function checkPrerequisites() {
+  // Bu fonksiyon doğru, değişiklik yok.
   const gitExists = await commandExists("git").catch(() => false);
   const npmExists = await commandExists("npm").catch(() => false);
 
@@ -31,6 +32,7 @@ async function checkPrerequisites() {
 }
 
 async function initProject(projectName) {
+  // Bu fonksiyon doğru, değişiklik yok.
   console.log(
     chalk.cyan.bold("--- Profesyonel Fiori Uygulama Oluşturucu v2.0 ---")
   );
@@ -81,7 +83,7 @@ async function initProject(projectName) {
   try {
     fs.ensureDirSync(targetDir);
     await processTemplate(templateDir, targetDir, projectData);
-    spinner.succeed(chalk.green("Proje yapısı başarıyla oluşturuldu."));
+    spinner.succeed(chalk.green(" Proje yapısı başarıyla oluşturuldu."));
 
     spinner.start(chalk.blue("Git deposu hazırlanıyor..."));
     if (fs.existsSync(path.join(targetDir, "gitignore.template"))) {
@@ -95,13 +97,13 @@ async function initProject(projectName) {
     await execa("git", ["commit", "-m", "Initial commit from fiori-cli"], {
       cwd: targetDir,
     });
-    spinner.succeed(chalk.green("Git deposu başarıyla başlatıldı."));
+    spinner.succeed(chalk.green(" Git deposu başarıyla başlatıldı."));
 
     spinner.start(
       chalk.blue("NPM bağımlılıkları kuruluyor (Bu işlem biraz sürebilir)...")
     );
     await execa("npm", ["install"], { cwd: targetDir });
-    spinner.succeed(chalk.green("NPM bağımlılıkları başarıyla kuruldu."));
+    spinner.succeed(chalk.green(" NPM bağımlılıkları başarıyla kuruldu."));
 
     console.log(chalk.green.bold("\n✨ Kurulum Tamamlandı! ✨"));
     console.log(`\nProjeniz '${chalk.cyan(projectName)}' klasöründe hazır.`);
@@ -118,20 +120,34 @@ async function initProject(projectName) {
   }
 }
 
+// --- BU FONKSİYON TAMAMEN YENİLENDİ ---
 async function processTemplate(templatePath, targetPath, data) {
   const entries = fs.readdirSync(templatePath);
   for (const entry of entries) {
     const sourceFile = path.join(templatePath, entry);
     const targetFile = path.join(targetPath, entry);
+
+    // --- BİRLEŞTİRİLMİŞ VE DOĞRU ATLAMA MANTIĞI ---
+    if (data.serviceType !== "Rest") {
+      const isLoginView = entry === "Login.view.xml";
+      const isLoginController = entry === "Login.controller.js";
+      const isRestCss =
+        templatePath.endsWith("css") &&
+        (entry === "style.css");
+      const isRestBackground =
+        templatePath.endsWith(path.join("img", "backgrounds")) &&
+        entry === "bg.png";
+
+      if (isLoginView || isLoginController || isRestCss || isRestBackground) {
+        continue; // Bu dosyaları atla
+      }
+    }
+
     const stats = fs.lstatSync(sourceFile);
 
     if (stats.isDirectory()) {
-      // --- DÜZELTME BURADA: 'service' klasörünü özel olarak ele alıyoruz ---
+      fs.ensureDirSync(targetFile);
       if (entry === "service") {
-        const targetServiceDir = targetFile;
-        fs.ensureDirSync(targetServiceDir);
-
-        // Kopyalanacak dosyaları seç
         const serviceFilesToCopy = [];
         if (data.serviceType === "Rest") {
           serviceFilesToCopy.push(
@@ -145,10 +161,9 @@ async function processTemplate(templatePath, targetPath, data) {
           serviceFilesToCopy.push("ODataV4Service.js");
         }
 
-        // Sadece seçilen dosyaları kopyala
         for (const serviceFile of serviceFilesToCopy) {
           const sourceServicePath = path.join(sourceFile, serviceFile);
-          const targetServicePath = path.join(targetServiceDir, serviceFile);
+          const targetServicePath = path.join(targetFile, serviceFile);
           if (fs.existsSync(sourceServicePath)) {
             const templateContent = fs.readFileSync(sourceServicePath, "utf-8");
             const renderedContent = ejs.render(templateContent, data);
@@ -156,15 +171,22 @@ async function processTemplate(templatePath, targetPath, data) {
           }
         }
       } else {
-        // Diğer klasörleri recursive olarak işle
-        fs.ensureDirSync(targetFile);
         await processTemplate(sourceFile, targetFile, data);
       }
     } else {
-      // Dosyaları EJS ile işle
-      const templateContent = fs.readFileSync(sourceFile, "utf-8");
-      const renderedContent = ejs.render(templateContent, data);
-      fs.writeFileSync(targetFile, renderedContent, "utf-8");
+      if (
+        entry.endsWith(".css") ||
+        entry.endsWith(".png") ||
+        entry.endsWith(".svg") ||
+        entry.endsWith(".jpg") ||
+        entry.endsWith(".jpeg")
+      ) {
+        fs.copyFileSync(sourceFile, targetFile);
+      } else {
+        const templateContent = fs.readFileSync(sourceFile, "utf-8");
+        const renderedContent = ejs.render(templateContent, data);
+        fs.writeFileSync(targetFile, renderedContent, "utf-8");
+      }
     }
   }
 }

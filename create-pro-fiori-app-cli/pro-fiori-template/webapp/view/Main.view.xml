@@ -1,5 +1,5 @@
 <mvc:View
-	controllerName=""
+	controllerName="<%= namespace %>.controller.Main"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
 	xmlns:c="sap.ui.core"
