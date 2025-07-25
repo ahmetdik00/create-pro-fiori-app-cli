@@ -4,7 +4,7 @@
   "description": "CLI to generate a professional Fiori App",
   "main": "index.js",
   "bin": {
-    "create-pro-fiori-app": "./index.js"
+    "fiori-cli": "./index.js"
   },
   "dependencies": {
     "chalk": "^4.1.2",
