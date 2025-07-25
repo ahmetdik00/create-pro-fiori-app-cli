@@ -4,6 +4,7 @@ const chalk = require("chalk");
 const packageJson = require("./package.json");
 const initProject = require("./commands/new");
 const { addView, addModel, addFragment } = require("./commands/add");
+const { initDeploy } = require("./commands/deploy");
 
 const program = new Command();
 
@@ -41,10 +42,18 @@ addCommand
 
 // --- add fragment ---
 addCommand
-    .command('fragment <fragment-name>')
-    .description('Projeye yeni bir XML Fragment dosyası ekler (interaktif).')
-    .action((fragmentName) => {
-        addFragment(fragmentName);
-    });
+  .command("fragment <fragment-name>")
+  .description("Projeye yeni bir XML Fragment dosyası ekler (interaktif).")
+  .action((fragmentName) => {
+    addFragment(fragmentName);
+  });
+
+  // --- init-deploy ---
+program
+  .command("init-deploy")
+  .description(
+    "Projenin nwabap-ui5uploader ile SAP sistemine gönderilmesi için gerekli yapılandırmayı başlatır."
+  )
+  .action(initDeploy);
 
 program.parse(process.argv);
