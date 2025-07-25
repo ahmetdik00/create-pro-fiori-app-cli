@@ -27,6 +27,13 @@
   "bin": {
     "fiori-cli": "index.js"
   },
+  "files": [
+    "README.md",
+    "LICENSE",
+    "index.js",
+    "commands/",
+    "pro-fiori-template/"
+  ],
   "dependencies": {
     "@babel/generator": "^7.28.0",
     "@babel/parser": "^7.28.0",

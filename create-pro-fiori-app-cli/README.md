@@ -18,7 +18,7 @@ Artık sıfırdan proje kurmak, konfigürasyon dosyalarıyla boğuşmak veya yen
 Bu aracı global olarak kurarak bilgisayarınızın her yerinden erişebilirsiniz:
 
 ```bash
-npm install -g ./yol/bilgisayarimdaki/fiori-cli
+npm i create-pro-fiori-app-cli
 ```
 
 **Not**: Bu komutu, `fiori-cli`'nin kaynak kodlarının bulunduğu klasörün bir üst dizinindeyken çalıştırın veya tam yolu belirtin. NPM'e yayınlandığında bu komut `npm install -g fiori-cli` olacaktır.
@@ -32,7 +32,7 @@ npm install -g ./yol/bilgisayarimdaki/fiori-cli
 Yeni bir Fiori projesi başlatmak hiç bu kadar kolay olmamıştı:
 
 ```bash
-fiori-cli new <proje-adi>
+fiori-cli new <project-name>
 ```
 
 **Örnek**:
