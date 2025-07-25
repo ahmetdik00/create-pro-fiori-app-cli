@@ -1,0 +1,18 @@
+specVersion: "3.1"
+metadata:
+  name: "<%= projectName %>"
+type: application
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: true # Geliştirme ortamı için sertifika hatalarını yoksay
+        backend:
+          - path: /sap
+            url: <%= backendUrl %>
+
+    - name: ui5-middleware-servestatic
+      afterMiddleware: fiori-tools-proxy
+      configuration:
+        rootPath: ./dist

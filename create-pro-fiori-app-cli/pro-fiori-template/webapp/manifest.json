@@ -1,0 +1,125 @@
+{
+    "_version": "1.60.0",
+    "sap.app": {
+        "id": "<%= namespace %>",
+        "type": "application",
+        "i18n": "i18n/i18n.properties",
+        "applicationVersion": {
+            "version": "0.0.1"
+        },
+        "title": "{{appTitle}}",
+        "description": "{{appDescription}}",
+        "resources": "resources.json",
+        "sourceTemplate": {
+            "id": "",
+            "version": ""
+        },
+        "dataSources": {
+			"invoiceTrackAPI": {
+				"uri": "/sap/bc/test/",
+				"type": "JSON",
+				"settings": {
+					"sapClient": "100"
+				}
+			},
+            "v2Service": {
+                "uri": "/sap/opu/odata/sap/ZR_V2_SERVICE_SRV/",
+                "type": "OData",
+                    "settings": {
+                    "odataVersion": "2.0"
+                }
+            },
+            "v4Service": {
+                "uri": "/sap/opu/odata/sap/ZR_V4_SERVICE_OD/",
+                "type": "OData",
+                "settings": {
+                    "odataVersion": "4.0",
+                    "synchronizationMode": "None"
+                }
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        }
+    },
+    "sap.ui5": {
+        "flexEnabled": true,
+        "dependencies": {
+            "minUI5Version": "1.136.2",
+            "libs": {
+                "sap.m": {},
+                "sap.ui.core": {},
+                "sap.fe.templates": {}
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "i18n": {
+                "type": "sap.ui.model.resource.ResourceModel",
+                "settings": {
+                    "bundleName": "<%= namespace %>.i18n.i18n"
+                }
+            },
+            "oDataV2Model": {
+                "dataSource": "v2Service",
+                "preload": true,
+                "settings": {
+                    "defaultBindingMode": "TwoWay",
+                    "useBatch": true,
+                    "json": true
+                }
+            },
+            "oDataV4Model": {
+                "dataSource": "v4Service",
+                "preload": true,
+                "settings": {
+                    "operationMode": "Server",
+                    "groupId": "$auto",
+                    "synchronizationMode": "None"
+                }
+            }
+        },
+        "resources": {
+            "css": []
+        },
+        "routing": {
+            "config": {},
+            "routes": [
+                {
+                    "name": "PageListReport",
+                    "pattern": ":?query:",
+                    "target": "PageListReport"
+                }
+            ],
+            "targets": {
+                "PageListReport": {
+                    "type": "Component",
+                    "id": "PageListReport",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+                        "settings": {
+                            "navigation": {},
+                            "contextPath": "/Page"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
