@@ -15,28 +15,27 @@
             "version": ""
         },
         "dataSources": {
-			"invoiceTrackAPI": {
-				"uri": "/sap/bc/test/",
+			<% if (serviceType === 'Rest') { %>
+            "mainServiceAPI": {
+				"uri": "/sap/bc/your_rest_api/",
 				"type": "JSON",
 				"settings": {
 					"sapClient": "100"
 				}
-			},
-            "v2Service": {
-                "uri": "/sap/opu/odata/sap/ZR_V2_SERVICE_SRV/",
+			}
+            <% } else if (serviceType === 'ODataV2') { %>
+            "mainService": {
+                "uri": "/sap/opu/odata/sap/YOUR_V2_SERVICE_SRV/",
                 "type": "OData",
-                    "settings": {
-                    "odataVersion": "2.0"
-                }
-            },
-            "v4Service": {
-                "uri": "/sap/opu/odata/sap/ZR_V4_SERVICE_OD/",
-                "type": "OData",
-                "settings": {
-                    "odataVersion": "4.0",
-                    "synchronizationMode": "None"
-                }
+                "settings": { "odataVersion": "2.0" }
             }
+            <% } else if (serviceType === 'ODataV4') { %>
+            "mainService": {
+                "uri": "/sap/opu/odata/sap/YOUR_V4_SERVICE_OD/",
+                "type": "OData",
+                "settings": { "odataVersion": "4.0" }
+            }
+            <% } %>
         }
     },
     "sap.ui": {
@@ -76,6 +75,7 @@
                     "bundleName": "<%= namespace %>.i18n.i18n"
                 }
             },
+            <% if (serviceType === 'ODataV2') { %>
             "oDataV2Model": {
                 "dataSource": "v2Service",
                 "preload": true,
@@ -85,6 +85,7 @@
                     "json": true
                 }
             },
+            <% } else if (serviceType === 'ODataV4') { %>
             "oDataV4Model": {
                 "dataSource": "v4Service",
                 "preload": true,
@@ -93,7 +94,8 @@
                     "groupId": "$auto",
                     "synchronizationMode": "None"
                 }
-            }
+            },
+            <% } %>
         },
         "resources": {
             "css": []
@@ -101,23 +103,40 @@
         "routing": {
             "config": {},
             "routes": [
+                <% if (serviceType === 'Rest') { %>
                 {
-                    "name": "PageListReport",
-                    "pattern": ":?query:",
-                    "target": "PageListReport"
-                }
+					"name": "Login",
+					"pattern": "",
+					"target": "Login"
+				},
+                {
+					"name": "Main",
+					"pattern": "main",
+					"target": "Main",
+					"requiresAuth": true
+				}
+                <% } else { %>
+				{
+					"name": "Main",
+					"pattern": "",
+					"target": "Main"
+				}
+                <% } %>
             ],
             "targets": {
-                "PageListReport": {
-                    "type": "Component",
-                    "id": "PageListReport",
-                    "name": "sap.fe.templates.ListReport",
-                    "options": {
-                        "settings": {
-                            "navigation": {},
-                            "contextPath": "/Page"
-                        }
-                    }
+                <% if (serviceType === 'Rest') { %>
+                "Login": {
+					"viewName": "Login",
+					"viewId": "Login",
+					"viewLevel": 1
+				},
+                <% } %>
+                "Main": {
+                    "viewName": "Main",
+                    "viewId": "Main"
+                },
+				"notFound": { 
+                    "viewName": "NotFound" 
                 }
             }
         }
