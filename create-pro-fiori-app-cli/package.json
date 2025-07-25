@@ -1,8 +1,29 @@
 {
   "name": "create-pro-fiori-app-cli",
   "version": "1.0.0",
-  "description": "CLI to generate a professional Fiori App",
+  "description": "SAPUI5/Fiori projeleri için akıllı proje oluşturucu ve yönetici. Kod üretimi, deployment ve kalite kontrol otomasyonu sağlar.",
   "main": "index.js",
+  "author": "Ahmet Dik ahmetdikv1@gmail.com",
+  "license": "MIT",
+  "keywords": [
+    "sapui5",
+    "fiori",
+    "sap",
+    "cli",
+    "generator",
+    "scaffolding",
+    "automation",
+    "odata",
+    "rest"
+  ],
+  "homepage": "https://github.com/ahmetdik00/create-pro-fiori-app-cli/blob/main/README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ahmetdik00/create-pro-fiori-app-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ahmetdik00/create-pro-fiori-app-cli/issues"
+  },
   "bin": {
     "fiori-cli": "./index.js"
   },
