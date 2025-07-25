@@ -1,0 +1,10 @@
+# Log dosyaları
+npm-debug.log*
+
+# Test dosyaları ve konfigürasyonlar (eğer varsa)
+/tests/
+.vscode/
+
+# İşletim sistemi dosyaları
+.DS_Store
+Thumbs.db

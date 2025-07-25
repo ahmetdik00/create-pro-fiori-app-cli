@@ -25,7 +25,7 @@
     "url": "https://github.com/ahmetdik00/create-pro-fiori-app-cli/issues"
   },
   "bin": {
-    "fiori-cli": "./index.js"
+    "fiori-cli": "index.js"
   },
   "dependencies": {
     "@babel/generator": "^7.28.0",
