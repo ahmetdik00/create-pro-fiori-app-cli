@@ -1,7 +1,12 @@
+const inquirer = require("inquirer");
 const fs = require("fs-extra");
 const path = require("path");
 const chalk = require("chalk");
 const ejs = require("ejs");
+const parser = require("@babel/parser");
+const traverse = require("@babel/traverse").default;
+const generator = require("@babel/generator").default;
+const t = require("@babel/types");
 
 // View ve Controller için EJS şablonları
 const viewTemplate = `
@@ -57,15 +62,15 @@ const fragmentTemplate = `
     xmlns:core="sap.ui.core">
     <Dialog
         id="<%= fragmentName.toLowerCase() %>Dialog"
-        title="Select an Option">
+        title="<%= fragmentName %>">
         <content>
-            <!-- Add fragment content here -->
+            <!-- Fragment içeriğini buraya ekleyin -->
         </content>
         <beginButton>
-            <Button text="OK" press=".onCloseDialog"/>
+            <Button text="OK" press=".onClose<%= fragmentName %>Dialog"/>
         </beginButton>
         <endButton>
-            <Button text="Cancel" press=".onCloseDialog"/>
+            <Button text="Cancel" press=".onClose<%= fragmentName %>Dialog"/>
         </endButton>
     </Dialog>
 </core:FragmentDefinition>
@@ -226,34 +231,46 @@ function addModel(modelName) {
   }
 }
 
-function addFragment(fragmentName) {
+async function addFragment(fragmentName) {
   fragmentName = capitalizeFirstLetter(fragmentName);
   const projectRoot = process.cwd();
-  const manifestPath = path.join(projectRoot, "webapp/manifest.json");
-
-  if (!fs.existsSync(manifestPath)) {
-    console.error(
-      chalk.red(
-        "Hata: Bu komut bir Fiori projesinin kök dizininde çalıştırılmalıdır."
-      )
-    );
-    return;
-  }
-
-  console.log(
-    chalk.blue(`'${fragmentName}' adlı Fragment dosyası oluşturuluyor...`)
-  );
 
   try {
-    const fragmentDir = path.join(projectRoot, "webapp/fragment");
-    fs.ensureDirSync(fragmentDir); // 'fragment' klasörü yoksa oluşturur!
+    const controllerDir = path.join(projectRoot, "webapp/controller");
+    const allControllers = fs
+      .readdirSync(controllerDir)
+      .filter((f) => f.endsWith(".js"));
 
+    if (allControllers.length === 0) {
+      console.error(
+        chalk.red("Hata: Projede herhangi bir Controller dosyası bulunamadı.")
+      );
+      return;
+    }
+
+    const { targetControllerFile } = await inquirer.prompt([
+      {
+        type: "list",
+        name: "targetControllerFile",
+        message: "Bu fragment'ın fonksiyonları hangi Controller'a eklensin?",
+        choices: allControllers,
+      },
+    ]);
+
+    console.log(
+      chalk.blue(
+        `'${fragmentName}' Fragment'ı oluşturuluyor ve '${targetControllerFile}' dosyasına fonksiyonlar ekleniyor...`
+      )
+    );
+
+    const fragmentDir = path.join(projectRoot, "webapp/view/fragments");
+    fs.ensureDirSync(fragmentDir);
     const fragmentPath = path.join(fragmentDir, `${fragmentName}.fragment.xml`);
 
     if (fs.existsSync(fragmentPath)) {
       console.error(
         chalk.red(
-          `Hata: 'webapp/fragment/${fragmentName}.fragment.xml' adında bir dosya zaten mevcut.`
+          `Hata: '${path.relative(projectRoot, fragmentPath)}' zaten mevcut.`
         )
       );
       return;
@@ -263,32 +280,85 @@ function addFragment(fragmentName) {
     fs.writeFileSync(fragmentPath, fragmentContent);
     console.log(
       chalk.green(
-        ` -> Oluşturuldu: webapp/fragment/${fragmentName}.fragment.xml`
+        ` -> Oluşturuldu: ${path.relative(projectRoot, fragmentPath)}`
       )
     );
 
+    const controllerPath = path.join(controllerDir, targetControllerFile);
+    const controllerCode = fs.readFileSync(controllerPath, "utf-8");
+    const ast = parser.parse(controllerCode, { sourceType: "module" });
+
+    const namespace = JSON.parse(
+      fs.readFileSync(path.join(projectRoot, "webapp/manifest.json"))
+    )["sap.app"].id;
+    const fragmentLoadName = `${namespace}.view.fragments.${fragmentName}`;
+
+    traverse(ast, {
+      ObjectExpression(path) {
+        const parent = path.parent;
+        if (
+          t.isCallExpression(parent) &&
+          t.isMemberExpression(parent.callee) &&
+          parent.callee.property.name === "extend"
+        ) {
+          const openFuncName = `onOpen${fragmentName}Dialog`;
+          const closeFuncName = `onClose${fragmentName}Dialog`;
+          const dialogPropName = `p${fragmentName}Dialog`;
+
+          const openFunctionBody = `
+                        if (!this.${dialogPropName}) {
+                            this.${dialogPropName} = this.loadFragment({
+                                name: "${fragmentLoadName}"
+                            });
+                        }
+                        this.${dialogPropName}.then(function (oDialog) {
+                            oDialog.open();
+                        });
+                    `;
+          const closeFunctionBody = `this.byId("${fragmentName.toLowerCase()}Dialog").close();`;
+
+          const openBodyAst = parser.parse(openFunctionBody).program.body;
+          const closeBodyAst = parser.parse(closeFunctionBody).program.body;
+
+          const openFunctionNode = t.objectProperty(
+            t.identifier(openFuncName),
+            t.functionExpression(null, [], t.blockStatement(openBodyAst))
+          );
+
+          const closeFunctionNode = t.objectProperty(
+            t.identifier(closeFuncName),
+            t.functionExpression(null, [], t.blockStatement(closeBodyAst))
+          );
+
+          path.node.properties.push(openFunctionNode, closeFunctionNode);
+          path.stop();
+        }
+      },
+    });
+
+    const { code: newCode } = generator(
+      ast,
+      { retainLines: true },
+      controllerCode
+    );
+    fs.writeFileSync(controllerPath, newCode);
     console.log(
-      chalk.green.bold(`\n'${fragmentName}' fragment'ı başarıyla eklendi!`)
+      chalk.green(` -> Fonksiyonlar eklendi: ${targetControllerFile}`)
+    );
+
+    console.log(chalk.green.bold(`\nBaşarıyla tamamlandı!`));
+    console.log(
+      chalk.yellow(
+        `\n1. Fragment yolu: webapp/view/fragments/${fragmentName}.fragment.xml`
+      )
     );
     console.log(
-      chalk.yellow(`\nBu fragment'ı bir controller'dan açmak için:
-1. Controller'a Fragment'ı import edin: "sap/ui/core/Fragment"
-2. Bir fonksiyon içinde aşağıdaki gibi kullanın:
-   onOpenFragment: function() {
-       if (!this._p${fragmentName}Dialog) {
-           this._p${fragmentName}Dialog = this.loadFragment({
-               name: "<namespace>.view.fragment.${fragmentName}"
-           });
-       }
-       this._p${fragmentName}Dialog.then(function(oDialog){
-           oDialog.open();
-       });
-   },
-
-   onCloseDialog: function() {
-       this.byId("${fragmentName.toLowerCase()}Dialog").close();
-   }
-`)
+      chalk.yellow(`2. Fonksiyonlar '${targetControllerFile}' içine eklendi.`)
+    );
+    console.log(
+      chalk.yellow(
+        `3. Fragment'ı tetiklemek için bir butona press=".${`onOpen${fragmentName}Dialog`}" ekleyin.`
+      )
     );
   } catch (error) {
     console.error(chalk.red("\nBir hata oluştu:"), error);

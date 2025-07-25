@@ -41,8 +41,10 @@ addCommand
 
 // --- add fragment ---
 addCommand
-  .command("fragment <fragment-name>")
-  .description("Projeye yeni bir XML Fragment dosyası ekler.")
-  .action(addFragment);
+    .command('fragment <fragment-name>')
+    .description('Projeye yeni bir XML Fragment dosyası ekler (interaktif).')
+    .action((fragmentName) => {
+        addFragment(fragmentName);
+    });
 
 program.parse(process.argv);

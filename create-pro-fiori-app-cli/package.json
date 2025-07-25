@@ -7,6 +7,10 @@
     "fiori-cli": "./index.js"
   },
   "dependencies": {
+    "@babel/generator": "^7.28.0",
+    "@babel/parser": "^7.28.0",
+    "@babel/traverse": "^7.28.0",
+    "@babel/types": "^7.28.2",
     "chalk": "^4.1.2",
     "command-exists": "^1.2.9",
     "commander": "^14.0.0",
