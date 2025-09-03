@@ -40,6 +40,15 @@ async function initProject(projectName) {
 
   const answers = await inquirer.prompt([
     {
+      type: "list",
+      message: "Hangi uygulama şablonunu kullanmak istersiniz?",
+      name: "templateType",
+      choices: [
+        { name: "Basic Fiori App (Boş, tek sayfa başlangıç)", value: "basic-app" },
+        { name: "Fiori Worklist App (Liste sayfası şablonu)", value: "worklist-app" }
+      ]
+    },
+    {
       name: "namespace",
       message: "Uygulama namespace'ini girin (örn: com.mycompany.app):",
       default: "com.example.fiori",
@@ -66,10 +75,15 @@ async function initProject(projectName) {
     },
   ]);
 
-  const { namespace, serviceType, backendUrl } = answers;
+  const { templateType, namespace, serviceType, backendUrl } = answers;
   const projectData = { projectName, namespace, serviceType, backendUrl };
   const targetDir = path.join(process.cwd(), projectName);
-  const templateDir = path.join(__dirname, "..", "pro-fiori-template");
+  const templateDir = path.join(__dirname, "..", "templates", templateType);
+
+  if (!fs.existsSync(templateDir)) {
+    console.error(chalk.red(`\nHata: Seçilen şablon ('${templateType}') bulunamadı!`));
+    return;
+  }
 
   if (fs.existsSync(targetDir)) {
     console.error(

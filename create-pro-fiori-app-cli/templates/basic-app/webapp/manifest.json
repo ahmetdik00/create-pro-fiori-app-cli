@@ -10,10 +10,10 @@
         "title": "{{appTitle}}",
         "description": "{{appDescription}}",
         "resources": "resources.json",
-        "sourceTemplate": {
-            "id": "",
-            "version": ""
-        },
+		"sourceTemplate": {
+			"id": "basic_app",
+			"version": "1.0.0"
+		},
         "dataSources": {
 			<% if (serviceType === 'Rest') { %>
             "mainServiceAPI": {
@@ -56,12 +56,23 @@
     },
     "sap.ui5": {
         "flexEnabled": true,
+		"rootView": {
+			"viewName": "<%= namespace %>.view.App",
+			"type": "XML",
+			"async": true,
+            "id": "App"
+		},
         "dependencies": {
-            "minUI5Version": "1.136.2",
+            "minUI5Version": "1.30.0",
             "libs": {
-                "sap.m": {},
-                "sap.ui.core": {},
-                "sap.fe.templates": {}
+				"sap.ui.core": {},
+				"sap.m": {},
+				"sap.f": {},
+				"sap.ui.layout": {},
+				"sap.collaboration": {},
+				"sap.ui.comp": {},
+				"sap.uxap": {},
+				"sap.ui.table": {}
             }
         },
         "contentDensities": {
@@ -69,12 +80,15 @@
             "cozy": true
         },
         "models": {
-            "i18n": {
-                "type": "sap.ui.model.resource.ResourceModel",
-                "settings": {
-                    "bundleName": "<%= namespace %>.i18n.i18n"
-                }
-            }
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"settings": {
+					"bundleName": "<%= namespace %>.i18n.i18n",
+					"supportedLocales": ["en", "tr"],
+					"fallbackLocale": "en",
+					"async": true
+				}
+			}
             <% if (serviceType === 'ODataV2') { %>
             ,
             "oDataV2Model": {
@@ -107,25 +121,36 @@
             ]
         },
         "routing": {
-            "config": {},
+			"config": {
+				"routerClass": "sap.m.routing.Router",
+				"viewType": "XML",
+				"async": true,
+				"viewPath": "<%= namespace %>.view",
+				"controlAggregation": "pages",
+				"controlId": "app",
+                "clearControlAggregation": false,
+				"bypassed": {
+				  "target": "notFound"
+				}
+			},
             "routes": [
                 <% if (serviceType === 'Rest') { %>
                 {
 					"name": "Login",
 					"pattern": "",
-					"target": "Login"
+					"target": ["Login"]
 				},
                 {
-					"name": "Main",
-					"pattern": "main",
-					"target": "Main",
+					"name": "Home",
+					"pattern": "Home",
+					"target": ["Home"],
 					"requiresAuth": true
 				}
                 <% } else { %>
 				{
-					"name": "Main",
+					"name": "Home",
 					"pattern": "",
-					"target": "Main"
+					"target": ["Home"]
 				}
                 <% } %>
             ],
@@ -137,9 +162,10 @@
 					"viewLevel": 1
 				},
                 <% } %>
-                "Main": {
-                    "viewName": "Main",
-                    "viewId": "Main"
+                "Home": {
+                    "viewName": "Home",
+                    "viewId": "Home",
+                    "title": "{i18n>title}"
                 },
 				"notFound": { 
                     "viewName": "NotFound" 

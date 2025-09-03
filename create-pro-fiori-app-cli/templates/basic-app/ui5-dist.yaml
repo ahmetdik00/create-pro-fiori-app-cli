@@ -11,8 +11,13 @@ server:
         backend:
           - path: /sap
             url: <%= backendUrl %>
-
+        ui5:
+          path:
+          - /resources
+          - /test-resources
+          url: https://sapui5.hana.ondemand.com
     - name: ui5-middleware-servestatic
       afterMiddleware: fiori-tools-proxy
       configuration:
+        port: 35729
         rootPath: ./dist

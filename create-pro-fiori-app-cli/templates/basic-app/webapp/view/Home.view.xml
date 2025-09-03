@@ -1,0 +1,11 @@
+<mvc:View
+	controllerName="<%= namespace %>.controller.Home" xmlns:mvc="sap.ui.core.mvc"
+	displayBlock="true" xmlns="sap.m">
+	<Page id="idHomePage" title="{i18n>title}">
+		<content>
+			<VBox>
+				<Label text="{i18n>title}" />
+			</VBox>
+		</content>
+	</Page>
+</mvc:View>
