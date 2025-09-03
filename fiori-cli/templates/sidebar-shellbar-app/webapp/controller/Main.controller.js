@@ -1,18 +1,12 @@
 sap.ui.define(
   [
-    "./Base.controller",
-    "sap/ui/core/Fragment",
+    "./BaseController",
     "sap/ui/Device",
-    "../service/UserService",
-    "../service/SessionManager",
-    "../model/formatter",
+    "../util/Formatter",
   ],
   function (
     BaseController,
-    Fragment,
     Device,
-    UserService,
-    SessionManager,
     Formatter
   ) {
     "use strict";
@@ -23,7 +17,6 @@ sap.ui.define(
 
     return BaseController.extend("<%= namespace %>.controller.Main", {
       formatter: Formatter,
-      _popover: null, // Popover nesnesini saklamak için
       /**
        * @override
        * @brief Controller ilk yüklendiğinde çalışır.
@@ -71,60 +64,6 @@ sap.ui.define(
       },
 
       /**
-       * @brief Profil resmine (Avatar) tıklandığında çalışır ve Popover'ı açar.
-       * @param {sap.ui.base.Event} oEvent Olay nesnesi
-       */
-      onAvatarPress: function (oEvent) {
-        const oAvatar = oEvent.getSource();
-
-        if (!this._popover) {
-          Fragment.load({
-            name: "<%= namespace %>.view.fragments.UserPopover",
-            controller: this,
-          }).then((oPopover) => {
-            this._popover = oPopover;
-            this.getView().addDependent(this._popover);
-            this._popover.openBy(oAvatar);
-          });
-        } else {
-          this._popover.openBy(oAvatar);
-        }
-      },
-
-      /**
-       * @brief Popover içindeki 'Çıkış Yap' butonuna basıldığında çalışır.
-       */
-      onLogoutFromPopover: function () {
-        this._executeLogout();
-      },
-
-      /**
-       * @brief Merkezi logout mantığını çalıştıran özel fonksiyon.
-       * Kullanıcıya geri bildirim verdikten sonra 1 saniye bekler ve çıkış yapar.
-       * @private
-       */
-      _executeLogout: async function () {
-        this.setBusy(true, "settings", "/logBusy");
-
-        try {
-          // Bu, Promise ve setTimeout ile modern bekleme yöntemidir.
-          await new Promise((resolve) => setTimeout(resolve, 900));
-
-          await UserService.logout();
-
-          if (this._popover) {
-            this._popover.close();
-          }
-
-          window.location.href = "";
-        } catch (oError) {
-          this.handleServiceError(oError, this.getText("logoutError"));
-        } finally {
-          this.setBusy(false, "settings", "/logBusy");
-        }
-      },
-
-      /**
        * @brief Geri butonuna basıldığında tetiklenir.
        * Bir önceki sayfaya döner.
        */
@@ -151,11 +90,6 @@ sap.ui.define(
         const oItem = oEvent.getParameter("item");
         const sKey = oItem.getKey();
 
-        if (sKey === "logout") {
-          this._executeLogout();
-          return;
-        }
-
         const sCurrentRouteHash = this.getRouter().getHashChanger().getHash();
         if (sKey === sCurrentRouteHash) {
           if (Device.system.phone) {
@@ -169,26 +103,6 @@ sap.ui.define(
         }
 
         this.getRouter().navTo(sKey);
-      },
-
-      /**
-       * @brief Kullanıcı yeni bir dil seçtiğinde tetiklenir.
-       * @param {sap.ui.base.Event} oEvent
-       */
-      onLanguageSelect: function (oEvent) {
-        const sSelectedLanguage = oEvent.getParameter("item").getKey();
-        const oUriParams = new URLSearchParams(window.location.search);
-        const sCurrentLanguage = sap.ui
-          .getCore()
-          .getConfiguration()
-          .getLanguage()
-          .substring(0, 2);
-
-        if (sSelectedLanguage && sSelectedLanguage !== sCurrentLanguage) {
-          localStorage.setItem("userLanguage", sSelectedLanguage);
-          oUriParams.set("sap-language", sSelectedLanguage);
-          window.location.search = oUriParams.toString();
-        }
       },
     });
   }
