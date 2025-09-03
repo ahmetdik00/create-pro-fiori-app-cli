@@ -1,14 +1,6 @@
 sap.ui.define(
-  [
-    "./BaseController",
-    "sap/ui/Device",
-    "../util/Formatter",
-  ],
-  function (
-    BaseController,
-    Device,
-    Formatter
-  ) {
+  ["./BaseController", "sap/ui/Device"],
+  function (BaseController, Device) {
     "use strict";
 
     /* ---------------------------------------------------------------------------------------------- */
@@ -16,7 +8,6 @@ sap.ui.define(
     /* ---------------------------------------------------------------------------------------------- */
 
     return BaseController.extend("<%= namespace %>.controller.Main", {
-      formatter: Formatter,
       /**
        * @override
        * @brief Controller ilk yüklendiğinde çalışır.
@@ -35,7 +26,7 @@ sap.ui.define(
       /**
        * @brief Yan menüyü açıp kapatmak için ShellBar'daki butona basıldığında çalışır.
        */
-      onSideNavButtonPress: function () {
+      onShellBarMenuButtonPressed: function () {
         const oToolPage = this.byId("idToolPage");
         oToolPage.setSideExpanded(!oToolPage.getSideExpanded());
       },
@@ -47,7 +38,7 @@ sap.ui.define(
        * @private
        */
       _routePatternMatched: function (oEvent) {
-        this._sCurrentRouteName = oEvent.getParameter("name");
+        const sCurrentRouteName = oEvent.getParameter("name");
         const oNavigation = this.byId("idMenuSideNavigation");
 
         this.getModel("App").setProperty("/showNavButton", false);
@@ -57,36 +48,24 @@ sap.ui.define(
           Settings: "Settings",
         };
 
-        const sMenuKey = oRouteToMenuKeyMap[this._sCurrentRouteName];
+        const sMenuKey = oRouteToMenuKeyMap[sCurrentRouteName];
         if (sMenuKey) {
           oNavigation.setSelectedKey(sMenuKey);
         }
       },
 
       /**
-       * @brief Geri butonuna basıldığında tetiklenir.
-       * Bir önceki sayfaya döner.
+       * @brief ShellBar'daki ana sayfa simgesine basıldığında tetiklenir.
        */
-      navButtonPress: function () {
-        // Geçerli route adını al ve ana route'u belirle
-        let currentRouteName = this.getRouter().getHashChanger().getHash();
-        currentRouteName = currentRouteName.split("/")[0];
-
-        // Route ismine göre EventBus yayınını yap
-        const routeEvents = {
-          Settings: "navSettings"
-        };
-
-        if (routeEvents[currentRouteName]) {
-          this.getEventBus().publish(routeEvents[currentRouteName]);
-        }
+      onShellBarHomeIconPressed: function () {
+        this.getRouter().navTo("Home");
       },
 
       /**
        * @brief Yan menüdeki bir eleman seçildiğinde çalışır.
        * @param {sap.ui.base.Event} oEvent Olay nesnesi
        */
-      onItemSelect: function (oEvent) {
+      onSideNavigationItemSelect: function (oEvent) {
         const oItem = oEvent.getParameter("item");
         const sKey = oItem.getKey();
 

@@ -45,8 +45,8 @@ async function initProject(projectName) {
       name: "templateType",
       choices: [
         { name: "Basic Fiori App (Boş, tek sayfa başlangıç)", value: "basic-app" },
-        { name: "Fiori Worklist App (Liste sayfası şablonu)", value: "worklist-app" },
         { name: "Sidebar ve Shellbar (Kurumsal uygulama çerçevesi)", value: "sidebar-shellbar-app" }
+        { name: "Master-Detail (Liste ve Detay sayfası)", value: "master-detail-app" }
       ]
     },
     {

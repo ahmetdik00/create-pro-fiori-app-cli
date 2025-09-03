@@ -14,28 +14,15 @@
                 class="sapShellBar"
                 homeIcon="./img/logo/uisap_logo_amblemsiz.svg"
                 showMenuButton="true"
-                menuButtonPressed="onSideNavButtonPress"
-                showNavButton="{App>/showNavButton}"
-                navButtonPressed="navButtonPress">
-                <f:profile>
-                    <Avatar
-                        id="idAvatar"
-                        ariaHasPopup="Dialog"
-                        press=".onAvatarPress"
-                        displaySize="XS"
-                        initials="{
-                            path: 'session>/user/username',
-                            formatter: '.formatter.getInitials'
-                        }"
-                        backgroundColor="Accent6" />
-                </f:profile>
+                homeIconPressed="onShellBarHomeIconPressed"
+                menuButtonPressed="onShellBarMenuButtonPressed">
             </f:ShellBar>
         </tnt:header>
         <tnt:sideContent>
             <tnt:SideNavigation id="idMenuSideNavigation" class="menu"
                 selectedKey="InvoiceTrackReport"
                 expanded="false"
-                itemSelect="onItemSelect">
+                itemSelect="onSideNavigationItemSelect">
                 <tnt:NavigationList>
                     <tnt:NavigationListItem key="Home" text="{i18n>menuItemHomePage}" icon="sap-icon://home" />
                     <tnt:NavigationListItem key="Settings" text="{i18n>menuItemSettingsPage}" icon="sap-icon://process" />
